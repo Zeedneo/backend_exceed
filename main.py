@@ -1,5 +1,6 @@
-from flask import Flask, request
+from flask import Flask, request, Response
 from flask_pymongo import PyMongo
+import json
 
 app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://exceed_group13:zb924yhy@158.108.182.0:2255/exceed_group13'
@@ -66,7 +67,21 @@ def find_patient():
             "doctor": ele["doctor"],
             "patient": ele["patient"]
         })
-    return {"result": output}
+    return Response(json.dumps(output),  mimetype='application/json')
+
+
+@app.route('/find_one', methods=['GET'])
+def find_one():
+    myCollection = mongo.db.patient
+    query = myCollection.find_one()
+    output = {
+            "patient_room": query["patient_room"],
+            "status": query["status"],
+            "doctor": query["doctor"],
+            "patient": query["patient"]
+            }
+
+    return output
 
 
 @app.route('/create_patient', methods=['POST'])

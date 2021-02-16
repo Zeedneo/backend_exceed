@@ -36,7 +36,7 @@ def find():
 
 @app.route('/create', methods=['POST'])
 def from_robot():
-    myCollection = mongo.db.patient
+    myCollection = mongo.db.test
     data = request.json
     myInsert = {
         "robotNo": data["robotNo"],

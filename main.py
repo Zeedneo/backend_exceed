@@ -56,15 +56,17 @@ def find_patient():
     myCollection2 = mongo.db.info_patient
     myName = request.args.get("patient_room")
     if myName != None:
-        flit = {"patient_room": int(myName)}
-        flit2 = {"RoomNo": myName}
+        flit = {"patient_room": myName}
+        # flit2 = {"RoomNo": myName}
         query = myCollection.find(flit)
-        query2 = myCollection2.find(flit2)
+        # query2 = myCollection2.find(flit2)
     else:
         query = myCollection.find()
     output = []
     for ele in query:
         tmp = {}
+        flit2 = {"RoomNo": ele["patient_room"]}
+        query2 = myCollection2.find(flit2)
         for i in query2:
             tmp["Name"] = i["Name"]
             tmp["Gender"] = i["Gender"]
@@ -79,8 +81,6 @@ def find_patient():
 
         output.append({
             "patient_room": ele["patient_room"],
-            "status": ele["status"],
-            "doctor": ele["doctor"],
             "patient": tmp
         })
     return Response(json.dumps(output),  mimetype='application/json')
@@ -92,7 +92,6 @@ def find_one():
     query = myCollection.find_one()
     output = {
             "patient_room": query["patient_room"],
-            "status": query["status"],
             "patient": query["patient"]
             }
 

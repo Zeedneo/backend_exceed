@@ -6,6 +6,9 @@ app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://exceed_group13:zb924yhy@158.108.182.0:2255/exceed_group13'
 mongo =PyMongo(app)
 
+# myCollection = mongo.db.patient
+
+
 @app.route('/test', methods=['GET'])
 def hello():
     return {'res': 'hello world'}

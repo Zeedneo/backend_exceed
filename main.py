@@ -109,5 +109,32 @@ def patient():
     return {"result": "Create succesfully"}
 
 
+@app.route('/hw_get', methods=['GET'])
+def hw_get():
+    myCollection = mongo.db.hardware
+    data = myCollection.find_one()
+    output = []
+    if data != None:
+        filt = {"patient_room" : data["patient_room"]}
+        myCollection.delete_one(filt)
+        query = myCollection.find()
+        for ele in query:
+            output.append({
+                "patient_room" : ele["patient_room"]
+            })
+    return {"result" : output}
+
+
+@app.route('/hw_post', methods=['POST'])
+def hw_post():
+    myCollection = mongo.db.hardware
+    data = request.json
+    myInsert = {
+        "patient_room" : data["patient_room"]
+    }
+    myCollection.insert_one(myInsert)
+    return {"result" : "Create successfully"}
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port='3000', debug=True)

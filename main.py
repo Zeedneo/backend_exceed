@@ -93,7 +93,6 @@ def find_one():
     output = {
             "patient_room": query["patient_room"],
             "status": query["status"],
-            "doctor": query["doctor"],
             "patient": query["patient"]
             }
 

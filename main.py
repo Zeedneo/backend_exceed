@@ -1,4 +1,4 @@
-from flask import Flask, request, Response
+from flask import Flask, request, Response, jsonify
 from flask_pymongo import PyMongo
 import json
 
@@ -53,19 +53,35 @@ def from_robot():
 @app.route('/find_all_patient', methods=['GET'])
 def find_patient():
     myCollection = mongo.db.patient
+    myCollection2 = mongo.db.info_patient
     myName = request.args.get("patient_room")
     if myName != None:
         flit = {"patient_room": int(myName)}
+        flit2 = {"RoomNo": myName}
         query = myCollection.find(flit)
+        query2 = myCollection2.find(flit2)
     else:
         query = myCollection.find()
     output = []
     for ele in query:
+        tmp = {}
+        for i in query2:
+            tmp["Name"] = i["Name"]
+            tmp["Gender"] = i["Gender"]
+            tmp["BirthDate"] = i["BirthDate"]
+            tmp["Addres"] = i["Addres"]
+            tmp["Zip Code"] = i["Zip Code"]
+            tmp["Doctor"] = i["Doctor"]
+            tmp["Height"] = i["Height"]
+            tmp["Weight"] = i["Weight"]
+            tmp["Medical"] = i["Medical"]
+            tmp["Allergic drugs"] = i["Allergic drugs"]
+
         output.append({
             "patient_room": ele["patient_room"],
             "status": ele["status"],
             "doctor": ele["doctor"],
-            "patient": ele["patient"]
+            "patient": tmp
         })
     return Response(json.dumps(output),  mimetype='application/json')
 

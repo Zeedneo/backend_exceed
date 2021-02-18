@@ -122,7 +122,9 @@ def hw_get():
             output.append({
                 "patient_room" : ele["patient_room"]
             })
-    return {"result" : output}
+    else:
+        filt = []
+    return {"result" : output, "data" : filt}
 
 
 @app.route('/hw_post', methods=['POST'])

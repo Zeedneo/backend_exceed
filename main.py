@@ -2,16 +2,22 @@ from flask import Flask, request, Response, jsonify
 from flask_pymongo import PyMongo
 import json
 
+# from flask_cors import CORS, cross_origin
+
 app = Flask(__name__)
+# cors = CORS(app, resources={r"/": {"origins": "*"}})
 app.config['MONGO_URI'] = 'mongodb://exceed_group13:zb924yhy@158.108.182.0:2255/exceed_group13'
 mongo =PyMongo(app)
 
+
 @app.route('/test', methods=['GET'])
+# @cross_origin()
 def hello():
     return {'res': 'hello world'}
 
 
 @app.route('/find_all', methods=['GET'])
+# @cross_origin()
 def find():
     myCollection = mongo.db.test
     user_name = request.args.get("robotNo")
@@ -33,6 +39,7 @@ def find():
 
 
 @app.route('/create', methods=['POST'])
+# @cross_origin()
 def from_robot():
     myCollection = mongo.db.test
     data = request.json
@@ -48,6 +55,7 @@ def from_robot():
 
 
 @app.route('/find_all_patient', methods=['GET'])
+# @cross_origin()
 def find_patient():
     myCollection = mongo.db.patient
     myCollection2 = mongo.db.info_patient
@@ -69,12 +77,12 @@ def find_patient():
             tmp["Gender"] = i["Gender"]
             tmp["BirthDate"] = i["BirthDate"]
             tmp["Addres"] = i["Addres"]
-            tmp["Zip Code"] = i["Zip Code"]
+            tmp["Zip_Code"] = i["Zip_Code"]
             tmp["Doctor"] = i["Doctor"]
             tmp["Height"] = i["Height"]
             tmp["Weight"] = i["Weight"]
             tmp["Medical"] = i["Medical"]
-            tmp["Allergic drugs"] = i["Allergic drugs"]
+            tmp["Allergic_drugs"] = i["Allergic_drugs"]
 
         output.append({
             "patient_room": ele["patient_room"],
@@ -84,6 +92,7 @@ def find_patient():
 
 
 @app.route('/find_one', methods=['GET'])
+# @cross_origin()
 def find_one():
     myCollection = mongo.db.patient
     query = myCollection.find_one()
@@ -96,6 +105,7 @@ def find_one():
 
 
 @app.route('/create_patient', methods=['POST'])
+# @cross_origin()
 def patient():
     myCollection = mongo.db.patient
     data = request.json
@@ -110,6 +120,7 @@ def patient():
 
 
 @app.route('/hw_get', methods=['GET'])
+# @cross_origin()
 def hw_get():
     myCollection = mongo.db.hardware
     data = myCollection.find_one()
@@ -128,6 +139,7 @@ def hw_get():
 
 
 @app.route('/hw_post', methods=['POST'])
+# @cross_origin()
 def hw_post():
     myCollection = mongo.db.hardware
     data = request.json

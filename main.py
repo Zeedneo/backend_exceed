@@ -119,61 +119,37 @@ def patient():
     return {"result": "Create succesfully"}
 
 
-@app.route('/hw_status', methods=['GET'])
-def hw_status():
+@app.route('/hw_finish', methods=['GET'])
+@cross_origin()
+def hw_finish():
     myCollection_queue = mongo.db.queue_robot
     myCollection_robot = mongo.db.status_robot
-    myCollection_status = mongo.db.get_status
     data = myCollection_queue.find_one()
-    robot = myCollection_robot.find_one()
-    status = myCollection_status.find_one()
-    if data == None and robot == None:
-        filt = {"patient_room" : status["patient_room"]}
-        updated_content = {"$set": {
-            "patient_room" : "?",
-            "status" : "start"
-        }}
-        myCollection_status.update_one(filt, updated_content)
-    elif status["status"] == "receive":
-        filt_status = {"patient_room" : robot["patient_room"]}
-        filt = {"patient_room" : status["patient_room"]}
-        if data != None:
-            updated_content = {"$set": {
-                "patient_room" : data["patient_room"],
-                "status" : "start"
-            }}
-        else:
-            updated_content = {"$set": {
-                "patient_room" : "?",
-                "status" : "start"
-            }}
-        myCollection_status.update_one(filt, updated_content)
+    status = myCollection_robot.find_one()
+    if (data == None) and (status["status"] == "receive"):
+        filt_status = {"patient_room": status["patient_room"]}
         myCollection_robot.delete_one(filt_status)
-    elif status != None:
-        filt = {"patient_room" : status["patient_room"]}
-        updated_content = {"$set": {
-            "patient_room" : robot["patient_room"],
-            "status" : robot["status"]
-        }}
-        myCollection_status.update_one(filt, updated_content)
-    status = myCollection_status.find_one()
-    return {"stauts" : status["status"]}
+    return {"result": "Finish"}
+
 
 @app.route('/hw_return', methods=['PUT'])
+@cross_origin()
 def hw_return():
     myCollection_queue = mongo.db.queue_robot
     myCollection_robot = mongo.db.status_robot
     data = myCollection_queue.find_one()
     status = myCollection_robot.find_one()
-    filt = {"patient_room" : status["patient_room"]}
+    filt = {"patient_room": status["patient_room"]}
     updated_content = {"$set": {
-        "patient_room" : status["patient_room"],
-        "status" : "receive"
+        "patient_room": status["patient_room"],
+        "status": "receive"
     }}
     myCollection_robot.update_one(filt, updated_content)
-    return {"result" : "Update successfully"}
+    return {"result": "Update successfully"}
+
 
 @app.route('/hw_get', methods=['GET'])
+@cross_origin()
 def hw_get():
     myCollection_queue = mongo.db.queue_robot
     myCollection_robot = mongo.db.status_robot
@@ -181,37 +157,89 @@ def hw_get():
     status = myCollection_robot.find_one()
     output = []
     if data != None:
-        filt = {"patient_room" : data["patient_room"]}
+        filt = {"patient_room": data["patient_room"]}
         data_filt = int(data["patient_room"])
         myCollection_queue.delete_one(filt)
         updated_content = {"$set": {
-            "patient_room" : data["patient_room"],
-            "status" : "destination"
+            "patient_room": data["patient_room"],
+            "status": "destination"
         }}
         myCollection_robot.update_one(filt, updated_content)
     else:
         filt = []
         data_filt = []
     if status["status"] == "receive":
-        filt_status = {"patient_room" : status["patient_room"]}
+        filt_status = {"patient_room": status["patient_room"]}
         myCollection_robot.delete_one(filt_status)
-    return {"data" : data_filt}
+    return {"data": data_filt}
+
 
 @app.route('/hw_post', methods=['POST'])
+@cross_origin()
 def hw_post():
     myCollection_queue = mongo.db.queue_robot
     myCollection_robot = mongo.db.status_robot
     data = request.json
     myInsert_queue = {
-        "patient_room" : data["patient_room"]
+        "patient_room": data["patient_room"]
     }
     myInsert_robot = {
-        "patient_room" : data["patient_room"],
-        "status" : "start"
+        "patient_room": data["patient_room"],
+        "status": "start"
     }
     myCollection_queue.insert_one(myInsert_queue)
     myCollection_robot.insert_one(myInsert_robot)
-    return {"result" : "Create successfully"}
+    return {"result": "Create successfully"}
+
+
+@app.route('/hw_status', methods=['GET'])
+@cross_origin()
+def hw_status():
+    myCollection_queue = mongo.db.queue_robot
+    myCollection_robot = mongo.db.status_robot
+    myCollection_status = mongo.db.get_status
+    data = myCollection_queue.find_one()
+    robot = myCollection_robot.find_one()
+    status = myCollection_status.find_one()
+    if robot == None and status == None:
+        myInsert_robot = {
+            "patient_room": "?",
+            "status": "start"
+        }
+        myCollection_status.insert_one(myInsert_robot)
+    elif robot != None and status == None:
+        myInsert_robot = {
+            "patient_room": robot["patient_room"],
+            "status": robot["status"]
+        }
+        myCollection_status.insert_one(myInsert_robot)
+    elif data == None and status["status"] == "receive":
+        filt_status = {"patient_room": robot["patient_room"]}
+        filt = {"patient_room": status["patient_room"]}
+        updated_content = {"$set": {
+            "patient_room": "?",
+            "status": "start"
+        }}
+        myCollection_status.update_one(filt, updated_content)
+        myCollection_robot.delete_one(filt_status)
+
+    elif robot == None:
+        filt = {"patient_room": status["patient_room"]}
+        updated_content = {"$set": {
+            "patient_room": "?",
+            "status": "start"
+        }}
+        myCollection_status.update_one(filt, updated_content)
+    elif status != None:
+        filt = {"patient_room": status["patient_room"]}
+        updated_content = {"$set": {
+            "patient_room": robot["patient_room"],
+            "status": robot["status"]
+        }}
+        myCollection_status.update_one(filt, updated_content)
+
+    status = myCollection_status.find_one()
+    return {"stauts": status["status"]}
 
 
 if __name__ == "__main__":

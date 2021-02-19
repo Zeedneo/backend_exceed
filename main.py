@@ -119,34 +119,69 @@ def patient():
     return {"result": "Create succesfully"}
 
 
+@app.route('/hw_finish', methods=['GET'])
+def hw_finish():
+    myCollection_queue = mongo.db.queue_robot
+    myCollection_robot = mongo.db.status_robot
+    data = myCollection_queue.find_one()
+    status = myCollection_robot.find_one()
+    if (data == None) and (status["status"] == "receive"):
+        filt_status = {"patient_room" : status["patient_room"]}
+        myCollection_robot.delete_one(filt_status)
+    return {"result" : "Finish"}
+
+@app.route('/hw_return', methods=['PUT'])
+def hw_return():
+    myCollection_queue = mongo.db.queue_robot
+    myCollection_robot = mongo.db.status_robot
+    data = myCollection_queue.find_one()
+    status = myCollection_robot.find_one()
+    filt = {"patient_room" : status["patient_room"]}
+    updated_content = {"$set": {
+        "patient_room" : status["patient_room"],
+        "status" : "receive"
+    }}
+    myCollection_robot.update_one(filt, updated_content)
+    return {"result" : "Update successfully"}
+
 @app.route('/hw_get', methods=['GET'])
-@cross_origin()
 def hw_get():
-    myCollection = mongo.db.hardware
-    data = myCollection.find_one()
+    myCollection_queue = mongo.db.queue_robot
+    myCollection_robot = mongo.db.status_robot
+    data = myCollection_queue.find_one()
+    status = myCollection_robot.find_one()
     output = []
     if data != None:
         filt = {"patient_room" : data["patient_room"]}
-        myCollection.delete_one(filt)
-        query = myCollection.find()
-        for ele in query:
-            output.append({
-                "patient_room" : ele["patient_room"]
-            })
+        data_filt = int(data["patient_room"])
+        myCollection_queue.delete_one(filt)
+        updated_content = {"$set": {
+            "patient_room" : data["patient_room"],
+            "status" : "destination"
+        }}
+        myCollection_robot.update_one(filt, updated_content)
     else:
         filt = []
-    return {"result" : output, "data" : filt}
-
+        data_filt = []
+    if status["status"] == "receive":
+        filt_status = {"patient_room" : status["patient_room"]}
+        myCollection_robot.delete_one(filt_status)
+    return {"data" : data_filt}
 
 @app.route('/hw_post', methods=['POST'])
-@cross_origin()
 def hw_post():
-    myCollection = mongo.db.hardware
+    myCollection_queue = mongo.db.queue_robot
+    myCollection_robot = mongo.db.status_robot
     data = request.json
-    myInsert = {
+    myInsert_queue = {
         "patient_room" : data["patient_room"]
     }
-    myCollection.insert_one(myInsert)
+    myInsert_robot = {
+        "patient_room" : data["patient_room"],
+        "status" : "start"
+    }
+    myCollection_queue.insert_one(myInsert_queue)
+    myCollection_robot.insert_one(myInsert_robot)
     return {"result" : "Create successfully"}
 
 

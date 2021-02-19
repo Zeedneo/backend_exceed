@@ -7,7 +7,7 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 cors = CORS(app, resources={r"/": {"origins": "*"}})
 app.config['MONGO_URI'] = 'mongodb://exceed_group13:zb924yhy@158.108.182.0:2255/exceed_group13'
-mongo =PyMongo(app)
+mongo = PyMongo(app)
 
 
 @app.route('/test', methods=['GET'])
@@ -88,7 +88,7 @@ def find_patient():
             "patient_room": ele["patient_room"],
             "patient": tmp
         })
-    return Response(json.dumps(output),  mimetype='application/json')
+    return Response(json.dumps(output), mimetype='application/json')
 
 
 @app.route('/find_one', methods=['GET'])
@@ -97,9 +97,9 @@ def find_one():
     myCollection = mongo.db.patient
     query = myCollection.find_one()
     output = {
-            "patient_room": query["patient_room"],
-            "patient": query["patient"]
-            }
+        "patient_room": query["patient_room"],
+        "patient": query["patient"]
+    }
 
     return output
 
@@ -120,31 +120,36 @@ def patient():
 
 
 @app.route('/hw_finish', methods=['GET'])
+@cross_origin()
 def hw_finish():
     myCollection_queue = mongo.db.queue_robot
     myCollection_robot = mongo.db.status_robot
     data = myCollection_queue.find_one()
     status = myCollection_robot.find_one()
     if (data == None) and (status["status"] == "receive"):
-        filt_status = {"patient_room" : status["patient_room"]}
+        filt_status = {"patient_room": status["patient_room"]}
         myCollection_robot.delete_one(filt_status)
-    return {"result" : "Finish"}
+    return {"result": "Finish"}
+
 
 @app.route('/hw_return', methods=['PUT'])
+@cross_origin()
 def hw_return():
     myCollection_queue = mongo.db.queue_robot
     myCollection_robot = mongo.db.status_robot
     data = myCollection_queue.find_one()
     status = myCollection_robot.find_one()
-    filt = {"patient_room" : status["patient_room"]}
+    filt = {"patient_room": status["patient_room"]}
     updated_content = {"$set": {
-        "patient_room" : status["patient_room"],
-        "status" : "receive"
+        "patient_room": status["patient_room"],
+        "status": "receive"
     }}
     myCollection_robot.update_one(filt, updated_content)
-    return {"result" : "Update successfully"}
+    return {"result": "Update successfully"}
+
 
 @app.route('/hw_get', methods=['GET'])
+@cross_origin()
 def hw_get():
     myCollection_queue = mongo.db.queue_robot
     myCollection_robot = mongo.db.status_robot
@@ -152,37 +157,39 @@ def hw_get():
     status = myCollection_robot.find_one()
     output = []
     if data != None:
-        filt = {"patient_room" : data["patient_room"]}
+        filt = {"patient_room": data["patient_room"]}
         data_filt = int(data["patient_room"])
         myCollection_queue.delete_one(filt)
         updated_content = {"$set": {
-            "patient_room" : data["patient_room"],
-            "status" : "destination"
+            "patient_room": data["patient_room"],
+            "status": "destination"
         }}
         myCollection_robot.update_one(filt, updated_content)
     else:
         filt = []
         data_filt = []
     if status["status"] == "receive":
-        filt_status = {"patient_room" : status["patient_room"]}
+        filt_status = {"patient_room": status["patient_room"]}
         myCollection_robot.delete_one(filt_status)
-    return {"data" : data_filt}
+    return {"data": data_filt}
+
 
 @app.route('/hw_post', methods=['POST'])
+@cross_origin()
 def hw_post():
     myCollection_queue = mongo.db.queue_robot
     myCollection_robot = mongo.db.status_robot
     data = request.json
     myInsert_queue = {
-        "patient_room" : data["patient_room"]
+        "patient_room": data["patient_room"]
     }
     myInsert_robot = {
-        "patient_room" : data["patient_room"],
-        "status" : "start"
+        "patient_room": data["patient_room"],
+        "status": "start"
     }
     myCollection_queue.insert_one(myInsert_queue)
     myCollection_robot.insert_one(myInsert_robot)
-    return {"result" : "Create successfully"}
+    return {"result": "Create successfully"}
 
 
 if __name__ == "__main__":

@@ -128,44 +128,31 @@ def hw_status():
     data = myCollection_queue.find_one()
     robot = myCollection_robot.find_one()
     status = myCollection_status.find_one()
-    if status["status"] == "-":
-        filt = {"patient_room": status["patient_room"]}
+    if data == None and robot == None:
+        filt = {"patient_room" : status["patient_room"]}
         updated_content = {"$set": {
-            "patient_room": "?",
-            "status": "start"
-        }}
-        myCollection_status.update_one(filt, updated_content)
-    elif data == None and robot == None:
-        filt = {"patient_room": status["patient_room"]}
-        updated_content = {"$set": {
-            "patient_room": "?",
-            "status": "start"
+            "patient_room" : "?",
+            "status" : "-"
         }}
         myCollection_status.update_one(filt, updated_content)
     elif status["status"] == "receive":
-        filt_status = {"patient_room": robot["patient_room"]}
-        filt = {"patient_room": status["patient_room"]}
-        if data != None:
-            updated_content = {"$set": {
-                "patient_room": data["patient_room"],
-                "status": "start"
-            }}
-        else:
-            updated_content = {"$set": {
-                "patient_room": "?",
-                "status": "-"
-            }}
+        filt_status = {"patient_room" : robot["patient_room"]}
+        filt = {"patient_room" : status["patient_room"]}
+        updated_content = {"$set": {
+            "patient_room" : "?",
+            "status" : "-"
+        }}
         myCollection_status.update_one(filt, updated_content)
         myCollection_robot.delete_one(filt_status)
     elif status != None:
-        filt = {"patient_room": status["patient_room"]}
+        filt = {"patient_room" : status["patient_room"]}
         updated_content = {"$set": {
-            "patient_room": robot["patient_room"],
-            "status": robot["status"]
+            "patient_room" : robot["patient_room"],
+            "status" : robot["status"]
         }}
         myCollection_status.update_one(filt, updated_content)
     status = myCollection_status.find_one()
-    return {"status": status["status"]}
+    return {"stauts" : status["status"]}
 
 
 @app.route('/hw_return', methods=['PUT'])

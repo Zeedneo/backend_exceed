@@ -158,7 +158,7 @@ def hw_status():
         }}
         myCollection_status.update_one(filt, updated_content)
     status = myCollection_status.find_one()
-    return {"stauts" : status["status"]}
+    return {"status" : status["status"]}
 
 
 @app.route('/hw_return', methods=['PUT'])
